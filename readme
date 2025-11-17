@@ -1,0 +1,58 @@
+# Backend II – API de Usuarios, Sesiones y Autenticación
+
+Proyecto desarrollado en Node.js y Express para gestionar usuarios, sesiones, roles y autenticación utilizando **Passport** y **JWT**, con persistencia en **MongoDB** y motor de vistas **Handlebars**.
+
+## 🚀 Características principales
+
+- Servidor HTTP con **Express**.
+- Conexión a **MongoDB** mediante **Mongoose**.
+- Almacenamiento de sesiones en MongoDB con **connect-mongo**.
+- Autenticación con **Passport (estrategia Local)**.
+- Emisión y validación de **JSON Web Tokens (JWT)**.
+- Sistema de roles (`user`, `admin`) con middlewares de autorización.
+- CRUD de usuarios protegido por rol **admin**.
+- Health check básico (`/health`).
+
+---
+
+## 🧱 Tecnologías utilizadas
+
+- Node.js
+- Express
+- Mongoose
+- MongoDB / Mongo Atlas
+- express-session
+- connect-mongo
+- Passport
+- passport-local
+- jsonwebtoken
+- express-handlebars
+- Helmet, CORS, morgan, cookie-parser
+
+---
+
+## 📁 Estructura general del proyecto
+
+(Ejemplo aproximado, puede variar levemente)
+
+```txt
+Backend2/
+├─ server.js
+├─ .env
+├─ package.json
+└─ src/
+   ├─ app.js
+   ├─ config/
+   │  ├─ session.js
+   │  ├─ passport.js
+   │  └─ jwt.js
+   ├─ middlewares/
+   │  ├─ auth.js
+   │  ├─ jwtAuth.js
+   │  └─ error.js
+   ├─ models/
+   │  └─ user.js
+   ├─ routes/
+   │  ├─ user.routes.js
+   │  ├─ session.routes.js
+   │  └─ protected.routes.js
