@@ -3,8 +3,8 @@ const bcrypt = require('bcrypt');
 const router = express.Router();
 
 const User = require('../models/user');
-const { isAuth, requiredRole } = require('../middlewares/auth');
-
+const { isAuth, authorizeRoles } = require('../middlewares/auth');
+const { usersService } = require('../config/dependencies');
 
 const sanitizeUser = (user) => {
   if (!user) return null;
@@ -21,32 +21,10 @@ const sanitizeUser = (user) => {
   };
 };
 
-
+/* REGISTER (Service) */
 router.post('/register', async (req, res, next) => {
   try {
-    let { first_name, last_name, email, password, age } = req.body;
-
-    if (!first_name || !last_name || !email || !password) {
-      return res.status(400).json({ message: 'Faltan campos obligatorios' });
-    }
-
-    email = email.toLowerCase().trim();
-
-    const existing = await User.findOne({ email });
-    if (existing) {
-      return res.status(400).json({ message: 'El email ya está registrado' });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = await User.create({
-      first_name,
-      last_name,
-      email,
-      password: hashedPassword,
-      age,
-      role: 'user', 
-    });
+    const newUser = await usersService.register(req.body);
 
     res.status(201).json({
       message: 'Usuario registrado',
@@ -57,10 +35,10 @@ router.post('/register', async (req, res, next) => {
   }
 });
 
-
-router.get('/', isAuth, requiredRole('admin'), async (req, res, next) => {
+/* GET lista de usuarios — SOLO ADMIN (Service) */
+router.get('/', isAuth, authorizeRoles('admin'), async (req, res, next) => {
   try {
-    const users = await User.find().select('-password -__v');
+    const users = await usersService.getAll();
 
     res.json({
       message: 'Listado de usuarios',
@@ -71,27 +49,27 @@ router.get('/', isAuth, requiredRole('admin'), async (req, res, next) => {
   }
 });
 
-
-router.get('/:id', isAuth, requiredRole('admin'), async (req, res, next) => {
+/* GET detalle de usuario — SOLO ADMIN (Service) */
+router.get('/:id', isAuth, authorizeRoles('admin'), async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const user = await User.findById(id).select('-password -__v');
+    const user = await usersService.getById(id);
     if (!user) {
       return res.status(404).json({ message: 'Usuario no encontrado' });
     }
 
     res.json({
       message: 'Detalle de usuario',
-      user,
+      user: sanitizeUser(user),
     });
   } catch (err) {
     next(err);
   }
 });
 
-
-router.post('/', isAuth, requiredRole('admin'), async (req, res, next) => {
+/* POST crear usuario — SOLO ADMIN */
+router.post('/', isAuth, authorizeRoles('admin'), async (req, res, next) => {
   try {
     let { first_name, last_name, email, password, age, role, cart } = req.body;
 
@@ -127,16 +105,15 @@ router.post('/', isAuth, requiredRole('admin'), async (req, res, next) => {
   }
 });
 
-
-router.put('/:id', isAuth, requiredRole('admin'), async (req, res, next) => {
+/* PUT reemplazo TOTAL — SOLO ADMIN */
+router.put('/:id', isAuth, authorizeRoles('admin'), async (req, res, next) => {
   try {
     const { id } = req.params;
     let { first_name, last_name, email, password, age, role, cart } = req.body;
 
     if (!first_name || !last_name || !email || !password || !role) {
       return res.status(400).json({
-        message:
-          'PUT requiere first_name, last_name, email, password y role',
+        message: 'PUT requiere first_name, last_name, email, password y role',
       });
     }
 
@@ -173,8 +150,8 @@ router.put('/:id', isAuth, requiredRole('admin'), async (req, res, next) => {
   }
 });
 
-
-router.patch('/:id', isAuth, requiredRole('admin'), async (req, res, next) => {
+/* PATCH actualización PARCIAL — SOLO ADMIN */
+router.patch('/:id', isAuth, authorizeRoles('admin'), async (req, res, next) => {
   try {
     const { id } = req.params;
     const updates = { ...req.body };
@@ -205,8 +182,8 @@ router.patch('/:id', isAuth, requiredRole('admin'), async (req, res, next) => {
   }
 });
 
-
-router.delete('/:id', isAuth, requiredRole('admin'), async (req, res, next) => {
+/* DELETE — SOLO ADMIN */
+router.delete('/:id', isAuth, authorizeRoles('admin'), async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -226,6 +203,7 @@ router.delete('/:id', isAuth, requiredRole('admin'), async (req, res, next) => {
 });
 
 module.exports = router;
+
 
 
 

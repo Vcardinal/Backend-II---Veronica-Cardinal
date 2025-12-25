@@ -1,4 +1,4 @@
-// Middleware básico de manejo de errores
+// Middleware manejo de errores
 const errorMW = (err, _req, res, _next) => {
   console.error('❌ Error detectado:', err);
 

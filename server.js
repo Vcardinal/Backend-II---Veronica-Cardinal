@@ -1,6 +1,6 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
-const app = require('./src/app');
+const app = require('./src/app'); 
 
 const PORT = process.env.PORT || 3000;
 const MONGO_URL = process.env.MONGO_URL;
@@ -15,13 +15,9 @@ const MONGO_URL = process.env.MONGO_URL;
     });
 
     process.on('SIGINT', async () => {
-      console.log('\n🧹 Recibido SIGINT. Cerrando conexión...');
+      console.log('\n🧹 Cerrando servidor...');
       await mongoose.disconnect();
-      console.log('🔌 Desconectado de MongoDB');
-      server.close(() => {
-        console.log('👋 Servidor cerrado correctamente');
-        process.exit(0);
-      });
+      server.close(() => process.exit(0));
     });
   } catch (error) {
     console.error('❌ Error al conectar a MongoDB:', error);

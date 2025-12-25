@@ -1,10 +1,8 @@
-// src/config/jwt.js
 const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_super_secret_change_me';
 const JWT_EXPIRES_IN = '1h';
 
-// Crea token para un usuario
 const generateToken = (user) => {
   const payload = {
     id: user._id,

@@ -1,7 +1,4 @@
-// src/middlewares/auth.js
-
 const isAuth = (req, res, next) => {
-
   if (req.isAuthenticated && req.isAuthenticated()) {
     return next();
   }
@@ -15,25 +12,30 @@ const isAuth = (req, res, next) => {
   });
 };
 
-
-const requiredRole = (role) => {
+const authorizeRoles = (...allowedRoles) => {
   return (req, res, next) => {
+    const role =
+      req.user?.role ||        // Passport
+      req.session?.user?.role; // Session
 
-    const passportRole = req.user?.role;
-    const sessionRole = req.session?.user?.role;
-    const currentRole = passportRole || sessionRole;
-
-    if (currentRole === role) {
-      return next();
+    if (!role) {
+      return res.status(401).json({
+        message: 'No autorizado',
+      });
     }
 
-    return res.status(403).json({
-      message: `Acceso denegado: se requiere rol ${role}`,
-    });
+    if (!allowedRoles.includes(role)) {
+      return res.status(403).json({
+        message: 'Acceso denegado para este rol',
+      });
+    }
+
+    next();
   };
 };
 
 module.exports = {
   isAuth,
-  requiredRole,
+  authorizeRoles,
 };
+
